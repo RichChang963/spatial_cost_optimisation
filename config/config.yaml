@@ -1,0 +1,90 @@
+version: 0.0.1
+
+logging:
+  level: INFO
+  format: "%(levelname)s:%(name)s:%(message)s"
+
+input_dir: data/
+
+technology_mapping:
+  weather_year: [2021] # for spatial data cutout
+  technology: ["onwind", "solar"] #, "offwind"
+  utc: 1 # utc time for conversion of local time zone
+
+scenario:
+  countries: ["DE"]
+  output_folder: "sample"
+
+enable:
+  build_shape: true
+  build_year_cutout: true
+  build_natura_raster: true
+  build_all_matrices: true
+  build_all_profiles: true
+
+# definition of the Coordinate Reference Systems
+crs:
+  geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. 
+  distance_crs: EPSG:3857  # projection for distance measurements only. 
+  area_crs: EPSG:3035  # projection for area measurements only. 
+
+atlite:
+  threads: ATLITE_NPROCESSES
+  nprocesses: 4
+  resolution: 100 # unit in meters. Default value: 100
+  cutouts:
+    module: era5
+    dx: 0.3  # cutout/final resolution
+    dy: 0.3  # cutout/final resolution
+
+atlite_config:
+  onwind:
+    tech_method: wind
+    capacity_per_sqkm: 4 # Allowable density of wind turbine placement. # ScholzPhd Tab 4.3.1: 10MW/km^2
+    resource:
+      turbine: oedb:E-141/4200
+    correction_factor: 0.8855
+    evaluation: simple
+    copernicus:
+      # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
+      #  development of the REMix model and application for Europe. ( p.42 / p.28)
+      # CLC grid codes:
+      # 11X/12X - Various forest types
+      # 20  - Shrubs
+      # 30  - Herbaceus vegetation
+      # 40  - Cropland
+      # 50  - Urban
+      # 60  - Bare / Sparse vegetation
+      # 80  - Permanent water bodies
+      # 100 - Moss and lichen
+      # 200 - Open sea
+      grid_codes:  [20, 30, 40, 50, 60, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
+      distance: 1000
+      distance_grid_codes: [50]
+    natura: true
+  offwind:
+    tech_method: wind
+    capacity_per_sqkm: 2 # Allowable density of wind turbine placement. 
+    resource: 
+      turbine: NREL_ReferenceTurbine_2016CACost_10MW_offshore
+    correction_factor: 0.8855
+    copernicus:
+      grid_codes: [80, 200]
+    natura: true
+    evaluation: simple
+    max_depth: 50 # meter
+    max_shore_distance: 30000 # meter
+  solar:
+    tech_method: pv
+    capacity_per_sqkm: 1.7 # Allowable density of panel placement.
+    resource:
+      panel: CSi
+      orientation: latitude_optimal
+    correction_factor: 0.854337
+    copernicus:
+      grid_codes: [20, 30, 40, 50, 60, 90, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
+      distance: 500
+      distance_grid_codes: [50]
+    natura: true
+    evaluation: simple 
+
