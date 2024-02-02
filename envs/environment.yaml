@@ -1,0 +1,55 @@
+name: spatial_cost_opt
+channels:
+  - conda-forge
+  - bioconda
+  - https://conda.anaconda.org/gurobi
+dependencies:
+  - python>=3.8
+  - pip
+
+  - pypsa>=0.18.1
+  - atlite>=0.2.6
+  - dask
+
+  - xlrd
+  - openpyxl
+  - pycountry
+  - seaborn
+  - snakemake-minimal
+  - memory_profiler
+  - pre-commit
+  - yaml
+  - pytables
+  - lxml
+  - numpy
+  - pandas = 1.4.3
+  
+  - geopandas>=0.11.1
+  - xarray
+  - netcdf4
+  - networkx
+  - scipy
+  - shapely
+  - progressbar2
+  - pyomo
+  - matplotlib
+  - proj
+  - fiona <= 1.18.20  # Till issue https://github.com/Toblerity/Fiona/issues/1085 is not solved
+  # Keep in conda environment when calling ipython
+  - ipython
+  - ipykernel
+  - cartopy
+  - descartes
+  - rasterio
+  - geopy
+  - tqdm
+  - pytz
+  - ipykernel
+  - gurobi
+  - pip:
+    - vresutils>=0.3.1
+    - tsam>=1.1.0
+    - black
+    - cdsapi
+    - jupyter-server-proxy
+    - git+https://github.com/snakemake/snakemake
