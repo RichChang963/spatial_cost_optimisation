@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 from _helpers import configure_logging, iso2_to_iso3_country, iso3_to_iso2_country, plot_style, simplify_polys
 
-
-def __load_EEZ(iso3, EEZ_gpkg, geo_crs) -> gpd.GeoDataFrame:
+def __load_EEZ(iso3:str, EEZ_gpkg:str, geo_crs:str) -> gpd.GeoDataFrame:
     """Load the database of the Exclusive Economic Zones.
     Parameters
     ----------
@@ -35,8 +34,8 @@ def __load_EEZ(iso3, EEZ_gpkg, geo_crs) -> gpd.GeoDataFrame:
         The dataset shall be downloaded independently by the user (see guide) or
         together with pypsa-earth package.
     """
-    file_name = Path(EEZ_gpkg)
-    if not file_name.exists():
+    eez_file = Path(EEZ_gpkg)
+    if not eez_file.exists():
         raise Exception(
             f"File EEZ {EEZ_gpkg} not found, please download it from \
 https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg.zip \
@@ -62,12 +61,13 @@ https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg
     return eez_gdf
 
 
-def add_node(nuts, output_path_shape, output_path_node) -> gpd.GeoDataFrame:
+def add_node(nuts:str, output_path_shape:str, output_path_node:str, nuts_level:str=1
+)-> gpd.GeoDataFrame:
     """Create the node shapes out of country.
     Parameters
     ----------
     nuts : str
-        input path of division of the country under nuts2 level 
+        input path of division of the country 
     output_path_shape : str
         output path to save Shapefile of a whole country
     output_path_node : str
@@ -79,31 +79,32 @@ def add_node(nuts, output_path_shape, output_path_node) -> gpd.GeoDataFrame:
     """
     logger.info("Create a GeoDataFrame of nodal division in the country...")
     start = time.time()
-    gdf = gpd.read_file(nuts)
+    gdf = (
+        gpd.read_file(nuts)
+        .rename(columns={
+            "NAME_1": "nuts", 
+            "NAME_2": "node_name",
+            "id": "nuts",
+            "na": "node_name"
+        })
+        .replace({
+            "Ä": "Ae",
+            "Ö": "Oe",
+            "Ü": "Ue",
+            "ä": "ae",
+            "ö": "oe",
+            "ü": "ue",
+            "ß": "ss"
+        }, regex=True)
+    )
 
-    # GADM
-    # gdf = gdf[["NAME_1", "NAME_2", "geometry"]]
-    # final_gdf = (gdf.rename(columns={"NAME_1": "nuts1", "NAME_2": "node_name"})
-    #             .replace({"Ä": "Ae",
-    #                       "Ö": "Oe",
-    #                       "Ü": "Ue",
-    #                       "ä": "ae",
-    #                       "ö": "oe",
-    #                       "ü": "ue",
-    #                       "ß": "ss"}, regex=True))
-    # country_gdf = (final_gdf.dissolve(by="nuts1")[["geometry"]].reset_index()
-    #             .rename(columns={"nuts1":"node_name"}).set_index("node_name"))
-
-    # Eurostat
-    final_gdf = gdf.rename(columns={"id": "nuts1", "na": "node_name"})
-    country_gdf = final_gdf.dissolve(by="nuts1")[["geometry"]].reset_index()
-    country_gdf["node_name"] = "EU"
+    country_gdf = gdf.dissolve(by="nuts")[["geometry"]].reset_index()
+    country_gdf["node_name"] = country_gdf["nuts"][:2].map({"SW": "SE", "AU": "AT"})
     country_gdf = country_gdf.set_index("node_name")
-
     country_gdf.to_file(output_path_shape, driver="GeoJSON") 
-    final_gdf["node_name"] = final_gdf["node_name"].fillna(0)
-    final_gdf = final_gdf[["node_name" , "nuts1", "geometry"]].set_index(["node_name", "nuts1"])
-    final_gdf = final_gdf.dissolve(by=["node_name", "nuts1"], aggfunc="sum")[["geometry"]]
+    print(gdf.columns)
+    final_gdf = gdf[["node_name" , "nuts", "geometry"]].set_index(["node_name", "nuts"])
+    final_gdf = final_gdf.dissolve(by=["node_name", "nuts"], aggfunc="sum")[["geometry"]]
     final_gdf["geometry"].map(simplify_polys)
     final_gdf.to_file(output_path_node, driver="GeoJSON") 
     end = time.time()
@@ -112,18 +113,16 @@ def add_node(nuts, output_path_shape, output_path_node) -> gpd.GeoDataFrame:
     return final_gdf
 
 
-def add_node_map(gdf, eez, output_path): # node_style_dict
+def add_node_map(gdf: gpd.GeoSeries, eez:gpd.GeoSeries, output_path:str):
     """Create the graph of country map divided by nodes.
     Parameters
     ----------
-    gdf : shp
+    gdf : Shapefile
         division of the country under nuts2 level 
-    eez : shp
+    eez : Shapefile
         a GeoDataFrame of offshore shape within the country
     output_path : str
         output path to save png graph
-    node_style_dict : series
-        color hex codes of different nodes
     """
     logger.info("Create graphs and GeoJSONs of nodal division in the country...")
     start = time.time()
@@ -146,7 +145,8 @@ def add_node_map(gdf, eez, output_path): # node_style_dict
     logger.info(f"Graphs created. Processing time: {round((end - start), 2)}s")
 
 
-def add_eez(iso2, EEZ_gpkg, output_path, geo_crs="EPSG:4326") -> gpd.GeoDataFrame:
+def add_eez(iso2:list, EEZ_gpkg:str, output_path:str, geo_crs:str="EPSG:4326"
+) -> gpd.GeoDataFrame:
     """Add cover of offshore wind shapes
     Parameters
     ----------
@@ -158,6 +158,7 @@ def add_eez(iso2, EEZ_gpkg, output_path, geo_crs="EPSG:4326") -> gpd.GeoDataFram
         output path to save Shapefile
     geo_crs : str, optional
         CRS system, by default "EPSG:4326"
+        
     Returns
     -------
     gpd.GeoDataFrame
@@ -206,10 +207,12 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
     countries = snakemake.config["scenario"]["countries"]
+    nuts_level = snakemake.config["scenario"]["nuts_level"]
 
-    node = add_node(snakemake.input.nuts2, 
+    node = add_node(snakemake.input.nuts, 
                     snakemake.output.country_shapes,
-                    snakemake.output.onshore_shapes)
+                    snakemake.output.onshore_shapes,
+                    nuts_level)
 
     eez = add_eez(iso2=countries, 
                   EEZ_gpkg=snakemake.input.eez,
