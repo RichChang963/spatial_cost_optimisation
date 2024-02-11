@@ -12,9 +12,10 @@ technology_mapping:
   utc: 1 # utc time for conversion of local time zone
 
 scenario:
-  countries: ["DE"]
+  countries: ["DE"] # in iso2
   output_folder: "template"
-  
+  gadm_nuts_level: 1 # for pulling nuts Geojson file from GADM source
+
 enable:
   build_shape: true
   build_year_cutout: true

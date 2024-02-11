@@ -132,6 +132,13 @@ if config["enable"].get("build_all_profiles", True):
             expand(CDIR + "/{technology}_monthly_cf_{weather_year}.png", **config["technology_mapping"])
 
 
+rule get_gadm:
+    log: "log/00_get_gadm.log"
+        benchmark: "benchmarks/00_get_gadm"
+        script:
+            "scripts/00_get_gadm.py"
+
+
 rule remove_temporary_file:
 # onsuccess:
     run:
