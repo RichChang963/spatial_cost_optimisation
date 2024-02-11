@@ -84,9 +84,7 @@ rule build_res_profiles:
 if config["enable"].get("build_shape", True):
     rule build_shape:
         input: 
-            # nuts2 = GIDIR + "/admin_level/gadm36_2.shp",
-            # nuts2 = GIDIR + "/admin_level/Brazil_nuts_for_lcoh.geojson",
-            nuts2 = GIDIR + "/admin_level/eu_2436_nuts.geojson",
+            nuts = GIDIR + "/nuts/template_DE.geojson",
             eez = GIDIR + "/eez/eez_v12.gpkg",
         output: 
             country_shapes = CDIR + "/country_shape.geojson",

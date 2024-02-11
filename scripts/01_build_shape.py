@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 from _helpers import configure_logging, iso2_to_iso3_country, iso3_to_iso2_country, plot_style, simplify_polys
 
+
 def __load_EEZ(iso3:str, EEZ_gpkg:str, geo_crs:str) -> gpd.GeoDataFrame:
     """Load the database of the Exclusive Economic Zones.
     Parameters
@@ -82,8 +83,6 @@ def add_node(nuts:str, output_path_shape:str, output_path_node:str, nuts_level:s
     gdf = (
         gpd.read_file(nuts)
         .rename(columns={
-            "NAME_1": "nuts", 
-            "NAME_2": "node_name",
             "id": "nuts",
             "na": "node_name"
         })
