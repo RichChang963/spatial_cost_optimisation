@@ -24,6 +24,7 @@ def __load_EEZ(iso3, EEZ_gpkg, geo_crs) -> gpd.GeoDataFrame:
         path of input data of eez zone
     geo_crs : str
         CRS system
+
     Returns
     -------
     gpd.GeoDataFrame
@@ -65,10 +66,8 @@ def add_node(nuts, output_path_shape, output_path_node) -> gpd.GeoDataFrame:
     """Create the node shapes out of country.
     Parameters
     ----------
-    nuts : shp
-        division of the country under nuts2 level 
-    node : csv
-        zonal definition of a country
+    nuts : str
+        input path of division of the country under nuts2 level 
     output_path_shape : str
         output path to save Shapefile of a whole country
     output_path_node : str
@@ -76,7 +75,7 @@ def add_node(nuts, output_path_shape, output_path_node) -> gpd.GeoDataFrame:
     Returns
     -------
     gpd.GeoDataFrame
-        table of GeoDataframe wiht nodes of country
+        table of GeoDataframe with nodes of country
     """
     logger.info("Create a GeoDataFrame of nodal division in the country...")
     start = time.time()
@@ -181,19 +180,14 @@ def add_eez(iso2, EEZ_gpkg, output_path, geo_crs="EPSG:4326") -> gpd.GeoDataFram
             ret_df = ret_df._append(
                 {"node_name": c_code, "geometry": geom}, ignore_index=True
             )
-
-    # ret_df = ret_df.set_index("node_name")["geometry"].map(
-    #     lambda x: simplify_polys(x, minarea=0.001, tolerance=0.0001)
-    # )
     ret_df = ret_df.set_index("node_name")["geometry"]
-    ret_df_new = ret_df.apply(lambda x: make_valid(x))
     
-    # ret_df_new = ret_df.map(
-    #     lambda x: x
-    #     if x is None
-    #     else simplify_polys(x, minarea=0.001, tolerance=0.0001)
-    # )
-    # ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
+    ret_df_new = ret_df.map(
+        lambda x: x
+        if x is None
+        else simplify_polys(x, minarea=0.0001, tolerance=0.001)
+    )
+    ret_df_new = ret_df_new.apply(lambda x: x if x is None else make_valid(x))
 
     ret_df = ret_df_new.dropna()
     ret_df.to_file(output_path, driver="GeoJSON") 
