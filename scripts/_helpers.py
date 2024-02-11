@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from os import PathLike
 from pathlib import Path
 from typing import Union
 import numpy as np
@@ -11,7 +10,8 @@ import geopandas as gpd
 from shapely.geometry import MultiPolygon
 from operator import attrgetter
 from itertools import takewhile
-            
+import matplotlib
+
 def configure_logging(snakemake, skip_handlers=False):
     """
     Configure the basic behaviour for the logging module.
@@ -268,3 +268,29 @@ def simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True) -> gpd
         else:
             polys = mainpoly
     return polys.simplify(tolerance=tolerance)
+
+
+def plot_style():
+    """function for setting up the style of the graphs.
+    """ 
+
+    ############        LINES           ############
+    matplotlib.rcParams["lines.linewidth"] = 2
+    matplotlib.rcParams["lines.linestyle"] = "--"
+    ############        FONT           ############
+    matplotlib.rcParams["font.family"] = "Flexo"
+    matplotlib.rcParams["font.size"] = 14
+    ############        AXES           ############
+    matplotlib.rcParams["axes.facecolor"] = "#E3E4EA"
+    matplotlib.rcParams["axes.edgecolor"] = "white"
+    matplotlib.rcParams["axes.labelcolor"] = "black"
+    matplotlib.rcParams["axes.labelweight"] = "bold"
+    ############        TICKS           ############
+    matplotlib.rcParams["xtick.color"] = "#000000"
+    matplotlib.rcParams["ytick.color"] = "#000000"
+    ############        LEGEND           ############
+    matplotlib.rcParams["legend.facecolor"] = "inherit"
+    # matplotlib.rcParams['legend.title_fontweight'] = 'bold'
+    ############        FIGURE           ############
+    matplotlib.rcParams["figure.facecolor"] = "#E3E4EA"
+    matplotlib.rcParams["figure.edgecolor"] = "#E3E4EA"

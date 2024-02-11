@@ -1,6 +1,5 @@
 from os.path import normpath, exists
-from shutil import copyfile, move
-
+from shutil import copyfile, move, rmtree
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 HTTP = HTTPRemoteProvider()
 
@@ -96,7 +95,6 @@ if config["enable"].get("build_shape", True):
         script:
             "scripts/01_build_shape.py"
 
-
 if config["enable"].get("build_year_cutout", True):
     rule build_year_cutout:
         input:
@@ -131,6 +129,10 @@ if config["enable"].get("build_all_profiles", True):
             expand(CDIR + "/Annual_FLH_{technology}_{weather_year}.csv", **config["technology_mapping"]),
             expand(CDIR + "/netcdf_records/profile_{technology}_{weather_year}.nc", **config["technology_mapping"]),
             expand(CDIR + "/{technology}_potentials_{weather_year}.png", **config["technology_mapping"]),
-            expand(CDIR + "/{technology}_monthly_cf_{weather_year}.png", **config["technology_mapping"]),
+            expand(CDIR + "/{technology}_monthly_cf_{weather_year}.png", **config["technology_mapping"])
 
 
+rule remove_temporary_file:
+# onsuccess:
+    run:
+        rmtree(".snakemake")
