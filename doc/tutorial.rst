@@ -1,8 +1,3 @@
-..
-  SPDX-FileCopyrightText: 2022 The PyPSA meets Africa and Agora Energiewende authors
-
-  SPDX-License-Identifier: CC-BY-4.0
-
 .. _tutorial:
 
 ##########################################

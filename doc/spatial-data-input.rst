@@ -1,8 +1,4 @@
-.. 
-    SPDX-FileCopyrightText: 2022 Agora Energiewende authors
-    
-    SPDX-License-Identifier: CC-BY-4.0
-.. spatial-data-input: 
+.. _spatial-data-input: 
 
 ##########################################
 Spatial Data Input
