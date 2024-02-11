@@ -63,7 +63,7 @@ rule build_res_profiles:
         onshore_shapes = CDIR + "/node_onshore.geojson",
         offshore_shapes = CDIR + "/node_offshore.geojson",
     output:
-        availability_share = CDIR + "/Availability_share_{technology}_{weather_year}.csv",
+        availability = CDIR + "/Availability_share_{technology}_{weather_year}.csv",
         max_potentials = CDIR + "/Renewables_technical_potentials_{technology}_{weather_year}.csv",
         hourly_profile = CDIR + "/Availability_{technology}_{weather_year}.csv",
         annual_flh = CDIR + "/Annual_FLH_{technology}_{weather_year}.csv",

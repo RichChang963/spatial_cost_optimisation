@@ -21,7 +21,15 @@ logger = logging.getLogger(__name__)
 pd.options.mode.chained_assignment = None
 
 
-def _local_time_convert(data, utc_zone, weather_year) -> pd.DataFrame:
+tech_mapping = {
+    "solar": "PHOT",
+    "onwind": "WTON",
+    "offwind": "WTOF"
+}
+
+
+def _local_time_convert(data:pd.DataFrame, utc_zone:int, weather_year:str
+) -> pd.DataFrame:
     """Convert timezone from UTC+0 to local time zone.
 
     Parameters
@@ -49,8 +57,8 @@ def _local_time_convert(data, utc_zone, weather_year) -> pd.DataFrame:
     return data
 
 
-def calculate_renewables_profile(cutout_name, cutout_params, avail_matrix, client):
-
+def calculate_renewables_profile(cutout_name:str, cutout_params:dict, 
+avail_matrix:xr.Dataset, client:dict) -> tuple:
     """Calculate hourly profiles, max_potentials of different renewable technologies.
 
     Parameters
@@ -66,7 +74,7 @@ def calculate_renewables_profile(cutout_name, cutout_params, avail_matrix, clien
 
     Returns
     -------
-    pd.DataFrame
+    Tuple[pd.DataFrame, list, atlite.Cutout]
         a DataFrame of potential data
         a DataArray of area data
         atlite.Cutout file of the whole cutout boundary
@@ -83,14 +91,14 @@ def calculate_renewables_profile(cutout_name, cutout_params, avail_matrix, clien
             [cutout.coords['y'], cutout.coords['x']]))
     avail_matrix = xr.open_dataarray(avail_matrix)
     potential_matrix = capacity_per_sqkm * avail_matrix * area / 1000 # unit in GW
-
     resource["dask_kwargs"] = {"scheduler": client}
     avail_matrix.close()
 
     return potential_matrix, area, cutout
 
 
-def plot_potential_map(node, potential_matrix, technology, cutout, potential_map_output):
+def plot_potential_map(node:str, potential_matrix:pd.DataFrame, technology:str, 
+cutout:atlite.Cutout, potential_map_output:str) -> gpd.GeoDataFrame:
     """Plot potential map
 
     Parameters
@@ -123,8 +131,9 @@ def plot_potential_map(node, potential_matrix, technology, cutout, potential_map
     return node_gdf
     
 
-def generate_hourly_profile(node_gdf, area, avail_matrix, cutout, weather_year, 
-                            utc_timezone, technology, profile_output_path):
+def generate_hourly_profile(node_gdf:gpd.GeoDataFrame, area:xr.DataArray, 
+avail_matrix:xr.Dataset, cutout:atlite.Cutout, weather_year:int, utc_timezone:int,
+technology:str, profile_output_path:xr.Dataset) -> pd.DataFrame:
     """Create table of hourly capacity factor
 
     Parameters
@@ -141,6 +150,8 @@ def generate_hourly_profile(node_gdf, area, avail_matrix, cutout, weather_year,
         target year
     utc_timezone: int
         utc time zone
+    technology: str
+        onshore wind (WTON), offshore wind (WTOF), or solar pv (PHOT)
     profile_output_path: netCDF
         a netCDF of whole renewable profiles
 
@@ -177,99 +188,112 @@ def generate_hourly_profile(node_gdf, area, avail_matrix, cutout, weather_year,
     
     avail_matrix.close()
     p_nom_max_df = pd.DataFrame(p_nom_max.to_pandas(), columns = ["p_nom_max_MW"]) # MW
-    availability_df = pd.DataFrame(availability.to_pandas(), columns = ["availability_share"])
+    avail_df = pd.DataFrame(availability.to_pandas(), columns = ["availability_%"])
     print("Total p_nom_max: ", p_nom_max.sum().to_pandas(), "MW") # MW
 
-    complie_ds = xr.merge(
-        [
-            (correction_factor * profile).rename("profile"), # MW
-            capacities.rename("weight"), # MW
-            p_nom_max.rename("p_nom_max"), # MW
-            potential.rename("potential"), # MW
-        ]
-    )
+    complie_ds = xr.merge([
+        (correction_factor * profile).rename("profile"), # MW
+        capacities.rename("weight"), # MW
+        p_nom_max.rename("p_nom_max"), # MW
+        potential.rename("potential"), # MW
+    ])
 
     complie_ds.to_netcdf(profile_output_path)
 
-    hourly_profile_df = complie_ds["profile"].to_pandas().squeeze().reset_index()
-    hourly_profile_df = _local_time_convert(hourly_profile_df, utc_timezone, weather_year)
+    hourly_cf_df = complie_ds["profile"].to_pandas().squeeze().reset_index()
+    hourly_cf_df = _local_time_convert(hourly_cf_df, utc_timezone, weather_year)
 
-    profile_df = pd.DataFrame()
-    profile_df = pd.concat([profile_df, hourly_profile_df], axis=1)
+    cf_df = pd.DataFrame()
+    cf_df = pd.concat([cf_df, hourly_cf_df], axis=1)
 
-    if len(hourly_profile_df) == 8760:
-        profile_df["node"] = np.arange(0, 8760, 1)
-    else: # 8784
-        profile_df["node"] = np.arange(0, 8784, 1)
-    
-    final_profile_df = profile_df.set_index("node").T 
+    end_hour = 8760 if len(hourly_cf_df) == 8760 else 8784
+    cf_df["node"] = np.arange(0, end_hour, 1)
+    new_cf_df = cf_df.set_index("node").T 
 
-    if technology == "onwind":
-        tech_name = "WTON"
-    elif technology == "offwind":
-        tech_name = "WTOF"
-    else: 
-        tech_name = "PHOT"
-
-    final_profile_df.insert(0, "archetypes", tech_name)
-    final_profile_df.index.names = ["node"]
+    tech_name = tech_mapping.get(technology)
+    new_cf_df.insert(0, "archetypes", tech_name)
+    new_cf_df.index.names = ["node"]
     p_nom_max_df.insert(0, "archetypes", tech_name)
-    availability_df.insert(0, "archetypes", tech_name)
+    avail_df.insert(0, "archetypes", tech_name)
 
-    final_nom_max_df = (p_nom_max_df
-                        .reset_index()
-                        .rename(columns = {"node_name": "node",
-                                        "p_nom_max_MW": "technical potential [MW]",})
-                        .astype({"node": "string"})
-                        .sort_values(by=["node"])
-                        .set_index("node"))
+    new_nom_max_df = (
+        p_nom_max_df.reset_index()
+        .rename(columns = {
+            "node_name": "node",
+            "p_nom_max_MW": "technical potential [MW]"
+        })
+        .astype({"node": "string"})
+        .sort_values(by=["node"])
+        .set_index("node")
+    )
 
-    final_availability_df = (availability_df
-                        .reset_index()
-                        .rename(columns = {"node_name": "node"})
-                        .astype({"node": "string"})
-                        .sort_values(by=["node"])
-                        .set_index("node"))
+    new_avail_df = (
+        avail_df.reset_index()
+        .rename(columns = {"node_name": "node"})
+        .astype({"node": "string"})
+        .sort_values(by=["node"])
+        .set_index("node")
+    )
 
     if technology != "offwind":
-        country_df =  node_gdf.reset_index().rename(columns={"na": "node", "node_name": "node", "nuts1": "id"}).sort_values(by=["node"])
+        country_df =  (
+            node_gdf.reset_index()
+            .rename(columns={
+                "na": "node", 
+                "node_name": "node", 
+                "nuts1": "id"}
+            )
+            .sort_values(by=["node"])
+        )
         country_df["country"] = country_df["id"].str[:2]
-        country_df = country_df[["id", "country", "node"]].astype({"node": "string"}).set_index("node")
+        country_df = (
+            country_df[["id", "country", "node"]]
+            .astype({"node": "string"})
+            .set_index("node")
+        )
 
-        final_profile_df = pd.merge(final_profile_df, country_df, left_index=True, right_index=True, how='outer')
-        final_nom_max_df = pd.merge(final_nom_max_df, country_df, left_index=True, right_index=True, how='outer')
-        final_availability_df = pd.merge(final_availability_df, country_df, left_index=True, right_index=True, how='outer')
+        new_cf_df = pd.merge(
+            new_cf_df, country_df, 
+            left_index=True, right_index=True, how="outer"
+        )
+        new_nom_max_df = pd.merge(
+            new_nom_max_df, country_df, 
+            left_index=True, right_index=True, how="outer"
+        )
+        new_avail_df = pd.merge(
+            new_avail_df, country_df, 
+            left_index=True, right_index=True, how="outer"
+        )
         index_col = ["node", "id", "country", "archetypes"]
     else:
         index_col = ["node", "archetypes"]
 
-    yearly_flh_df = (pd.DataFrame(final_profile_df.reset_index()
-                        .set_index(index_col)
-                                .sum(axis=1)))
-    yearly_flh_df.columns.names = ["Annual_FLH"]
-    yearly_flh_df = yearly_flh_df.reset_index().set_index("node")
+    flh_df = pd.DataFrame(new_cf_df.reset_index().set_index(index_col).sum(axis=1))
+    flh_df.columns.names = ["Annual_FLH"]
+    flh_df = flh_df.reset_index().set_index("node")
 
-    final_profile_df.to_csv(snakemake.output.hourly_profile, encoding="utf-8-sig", sep=",")
-    yearly_flh_df.to_csv(snakemake.output.annual_flh, encoding="utf-8-sig", sep=",")
-    final_nom_max_df.to_csv(snakemake.output.max_potentials, encoding="utf-8-sig", sep=",")
-    final_availability_df.to_csv(snakemake.output.availability_share, encoding="utf-8-sig", sep=",")
+    new_cf_df.to_csv(snakemake.output.hourly_profile, encoding="utf-8-sig", sep=",")
+    flh_df.to_csv(snakemake.output.annual_flh, encoding="utf-8-sig", sep=",")
+    new_nom_max_df.to_csv(snakemake.output.max_potentials, encoding="utf-8-sig", sep=",")
+    new_avail_df.to_csv(snakemake.output.availability, encoding="utf-8-sig", sep=",")
 
-    return hourly_profile_df
+    return new_cf_df
 
 
-def plot_hourly_graph(hourly_profile_df, technology, monthly_profile_graph_output):
+def plot_hourly_graph(new_cf_df:pd.DataFrame, technology:str, 
+monthly_profile_graph_output:str):
     """Plot hourly capcaity factor graph
 
     Parameters
     ----------
-    final_profile_df : pd.DataFrame
+    new_cf_df : pd.DataFrame
         a DataFrame of hourly capacity factor
     technology : str
         name of technology
     monthly_profile_graph_output : str
         output path to save png graph
     """
-    hourly_profile_df.resample("1M").mean().plot(figsize=(8,4.5)) 
+    new_cf_df.resample("1M").mean().plot(figsize=(8,4.5)) 
     plot_style()
     plt.ylabel("Capacity Factor")
     plt.title(f"monthly capacity factor of {technology}")
@@ -318,7 +342,7 @@ if __name__ == "__main__":
                                   potential_map_output)
 
 
-    hourly_profile_df = generate_hourly_profile(node_gdf, 
+    new_cf_df = generate_hourly_profile(node_gdf, 
                                                 area, 
                                                 avail_matrix, 
                                                 cutout, 
@@ -327,6 +351,6 @@ if __name__ == "__main__":
                                                 snakemake.wildcards.technology,
                                                 snakemake.output.profile)
 
-    plot_hourly_graph(hourly_profile_df, 
+    plot_hourly_graph(new_cf_df, 
                       snakemake.wildcards.technology,
                       monthly_profile_graph_output)
