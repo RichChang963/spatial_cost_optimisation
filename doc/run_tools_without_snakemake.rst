@@ -1,8 +1,4 @@
-.. 
-    SPDX-FileCopyrightText: 2022 Agora Energiewende authors
-    
-    SPDX-License-Identifier: CC-BY-4.0
-.. run_tools_without_snakemake: 
+.. _run_tools_without_snakemake: 
 
 ######################################################
 Run the whole tools without snakemake rules

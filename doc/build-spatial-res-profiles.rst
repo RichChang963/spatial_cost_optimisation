@@ -1,8 +1,4 @@
-.. 
-    SPDX-FileCopyrightText: 2022 Agora Energiewende authors
-    
-    SPDX-License-Identifier: CC-BY-4.0
-.. build-spatial-res-profiles: 
+.. _build-spatial-res-profiles: 
 
 ######################################################
 Build Spatial Renewable Profile from Atlite Package

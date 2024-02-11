@@ -14,7 +14,23 @@ logger = logging.getLogger(__name__)
 from _helpers import configure_logging
 
 
-def create_cutout(onshore_shapes, offshore_shapes, weather_year, cutout_params, output_path):
+def create_cutout(onshore_shapes:str, offshore_shapes:str, weather_year:int, 
+cutout_params: dict, output_path:str):
+    """Create cutout of the node boundary to prepare for ERA5 API call.  
+
+    Parameters
+    ----------
+    onshore_shapes : str
+        file path of the onshore shape GeoJSON from build_shape.
+    offshore_shapes : str
+        file path of the offshore shape GeoJSON from build_shape.
+    weather_year : int
+        selected weather year (integer) from config.yaml.
+    cutout_params : dict
+        dictionary of parameters for cutout from config.yaml.
+    output_path : str
+        output file path to save cutout.
+    """
     logger.info(f"Extract coutout features of {str(weather_year)} from ERA5...")
     start = time.time()
     snapshots = (pd.date_range(
@@ -22,6 +38,8 @@ def create_cutout(onshore_shapes, offshore_shapes, weather_year, cutout_params, 
         f"{str(int(weather_year)+1)}-01-01", 
         freq="H", inclusive="left"))
     period = [snapshots[0], snapshots[-1]]
+    # set time variable in cutout_params: either slice the time frame if already defined
+    # , otherwise return with period variable.
     cutout_params["time"] = slice(*cutout_params.get("time", period))
     # If one of the parameters is there
     if {"x", "y", "bounds"}.isdisjoint(cutout_params):
@@ -36,7 +54,7 @@ def create_cutout(onshore_shapes, offshore_shapes, weather_year, cutout_params, 
         cutout_params["y"] = slice(*cutout_params["y"])
 
     logging.info(f"Preparing cutout with parameters {cutout_params}.")
-    features = ["wind", "height", "influx", "temperature"]
+    features = ["wind", "height", "influx", "temperature", "runoff"]
     cutout = atlite.Cutout(output_path, **cutout_params)
     cutout.prepare(features=features)
     end = time.time()
