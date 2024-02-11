@@ -14,7 +14,7 @@ technology_mapping:
 scenario:
   countries: ["DE"]
   output_folder: "template"
-  nuts_level: 1 # nuts level of the nodal division if applicable
+  
 enable:
   build_shape: true
   build_year_cutout: true
@@ -31,7 +31,7 @@ crs:
 atlite:
   threads: ATLITE_NPROCESSES
   nprocesses: 4
-  resolution: 100 # unit in meters. Default value: 100
+  resolution: 100 # resolution of Excluder Container with unit in meters. Default value: 100
   cutouts:
     module: era5
     dx: 0.3  # cutout/final resolution

@@ -56,14 +56,12 @@ https://www.marineregions.org/download_file.php?name=World_EEZ_v11_20191118_gpkg
         lambda x: iso3_to_iso2_country(x)
     )
     eez_gdf.reset_index(drop=True, inplace=True)
-
     eez_gdf.rename(columns={"ISO_TER1": "node_name"}, inplace=True)
 
     return eez_gdf
 
 
-def add_node(nuts:str, output_path_shape:str, output_path_node:str, nuts_level:str=1
-)-> gpd.GeoDataFrame:
+def add_node(nuts:str, output_path_shape:str, output_path_node:str)-> gpd.GeoDataFrame:
     """Create the node shapes out of country.
     Parameters
     ----------
@@ -206,12 +204,10 @@ if __name__ == "__main__":
 
     configure_logging(snakemake)
     countries = snakemake.config["scenario"]["countries"]
-    nuts_level = snakemake.config["scenario"]["nuts_level"]
 
     node = add_node(snakemake.input.nuts, 
                     snakemake.output.country_shapes,
-                    snakemake.output.onshore_shapes,
-                    nuts_level)
+                    snakemake.output.onshore_shapes)
 
     eez = add_eez(iso2=countries, 
                   EEZ_gpkg=snakemake.input.eez,
