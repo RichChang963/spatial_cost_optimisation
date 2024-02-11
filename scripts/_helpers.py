@@ -2,58 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
 from os import PathLike
 from pathlib import Path
-from re import X
 from typing import Union
-import matplotlib
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import MultiPolygon
-from shapely.ops import unary_union
 from operator import attrgetter
 from itertools import takewhile
-from pypsa.components import component_attrs, components
-from pypsa.descriptors import Dict
-
-FilePath = Union[str, "PathLike[str]"]
-
-
-def sets_path_to_root(root_directory_name):
-    """
-    Search and sets path to the given root directory (root/path/file).
-    Parameters
-    ----------
-    root_directory_name : str
-        Name of the root directory.
-    n : int
-        Number of folders the function will check upwards/root directed.
-    """
-    import os
-
-    repo_name = root_directory_name
-    n = 8  # check max 8 levels above. Random default.
-    n0 = n
-
-    while n >= 0:
-        n -= 1
-        # if repo_name is current folder name, stop and set path
-        if repo_name == os.path.basename(os.path.abspath(".")):
-            repo_path = os.getcwd()  # os.getcwd() = current_path
-            os.chdir(repo_path)  # change dir_path to repo_path
-            print("This is the repository path: ", repo_path)
-            print("Had to go %d folder(s) up." % (n0 - 1 - n))
-            break
-        # if repo_name NOT current folder name for 5 levels then stop
-        if n == 0:
-            print("Cant find the repo path.")
-        # if repo_name NOT current folder name, go one dir higher
-        else:
-            upper_path = os.path.dirname(os.path.abspath("."))  # name of upper folder
-            os.chdir(upper_path)
-
             
 def configure_logging(snakemake, skip_handlers=False):
     """
@@ -139,35 +96,6 @@ def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0)
     urllib.request.urlretrieve(url, file, reporthook=dlProgress, data=data)
 
 
-def get_redHours(stepSize: int, load: pd.Series):
-    """[summary]
-    Args:
-        stepSize ([int]): stepsize to aggregate
-        load ([pd.DataFrame]): total electricity load
-        includePeak (bool, optional): [description]. Defaults to True.
-    Returns:
-        RedHours[list]: List of reduced hours
-        weights: weight per reduced snapshot
-    """
-    hourList = np.arange(0, 8760, 1)
-    xthHour = hourList[::stepSize]
-    peakHour = load.argmax()
-
-    if peakHour not in xthHour:
-        print(f"adding peak hour: {peakHour}th")
-        xthHour = np.append(xthHour, peakHour)
-    RedHours = np.sort(xthHour)
-    Weightings = [stepSize if x != peakHour else 1 for x in RedHours]
-    Weightings[-1] = 8760 - (stepSize * (len(RedHours) - 2) + 1)
-    weights = pd.DataFrame(Weightings, index=list(range(1, len(RedHours) + 1, 1)))
-    weights.rename(columns={0: "objective"}, inplace=True)
-    weights["objective"] = stepSize  # having uniform weighting
-    weights["generators"] = weights["objective"]
-    weights["stores"] = weights["objective"]
-
-    return RedHours, weights
-
-
 def mock_snakemake(rulename, **wildcards):
     """
     This function is expected to be executed from the 'scripts'-directory of '
@@ -231,32 +159,6 @@ def mock_snakemake(rulename, **wildcards):
 
     os.chdir(script_dir)
     return snakemake
-
-
-def override_component_attrs(directory):
-    """Tell PyPSA that links can have multiple outputs by
-    overriding the component_attrs. This can be done for
-    as many buses as you need with format busi for i = 2,3,4,5,....
-    See https://pypsa.org/doc/components.html#link-with-multiple-outputs-or-inputs
-    Parameters
-    ----------
-    directory : string
-        Folder where component attributes to override are stored
-        analogous to ``pypsa/component_attrs``, e.g. `links.csv`.
-    Returns
-    -------
-    Dictionary of overriden component attributes.
-    """
-
-    attrs = Dict({k: v.copy() for k, v in component_attrs.items()})
-
-    for component, list_name in components.list_name.items():
-        fn = f"{directory}/{list_name}.csv"
-        if os.path.isfile(fn):
-            overrides = pd.read_csv(fn, index_col=0, na_values="n/a")
-            attrs[component] = overrides.combine_first(attrs[component])
-
-    return attrs
 
 
 def __get_country(target, **keys):
@@ -338,55 +240,6 @@ def iso3_to_iso2_country(iso3):
         iso2 = iso2.replace(i[0], i[1])
 
     return iso2
-
-
-def save_to_geojson(df, fn):
-    if os.path.exists(fn):
-        os.unlink(fn)  # remove file if it exists
-
-    # save file if the (Geo)DataFrame is non-empty
-    if df.empty:
-        # create empty file to avoid issues with snakemake
-        with open(fn, "w") as fp:
-            pass
-    else:
-        # save file
-        df.to_file(fn, driver="GeoJSON")
-
-
-def read_geojson(fn):
-    # if the file is non-zero, read the geodataframe and return it
-    if os.path.getsize(fn) > 0:
-        return gpd.read_file(fn)
-    else:
-        # else return an empty GeoDataFrame
-        return gpd.GeoDataFrame(geometry=[])
-
-
-def plot_style():
-    """function for setting up the style of the graphs.
-    """ 
-
-    ############        LINES           ############
-    matplotlib.rcParams["lines.linewidth"] = 2
-    matplotlib.rcParams["lines.linestyle"] = "--"
-    ############        FONT           ############
-    matplotlib.rcParams["font.family"] = "Flexo"
-    matplotlib.rcParams["font.size"] = 14
-    ############        AXES           ############
-    matplotlib.rcParams["axes.facecolor"] = "#E3E4EA"
-    matplotlib.rcParams["axes.edgecolor"] = "white"
-    matplotlib.rcParams["axes.labelcolor"] = "black"
-    matplotlib.rcParams["axes.labelweight"] = "bold"
-    ############        TICKS           ############
-    matplotlib.rcParams["xtick.color"] = "#000000"
-    matplotlib.rcParams["ytick.color"] = "#000000"
-    ############        LEGEND           ############
-    matplotlib.rcParams["legend.facecolor"] = "inherit"
-    # matplotlib.rcParams['legend.title_fontweight'] = 'bold'
-    ############        FIGURE           ############
-    matplotlib.rcParams["figure.facecolor"] = "#E3E4EA"
-    matplotlib.rcParams["figure.edgecolor"] = "#E3E4EA"
 
 
 def simplify_polys(polys, minarea=0.1, tolerance=0.01, filterremote=True) -> gpd.GeoDataFrame:
