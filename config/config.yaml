@@ -7,14 +7,14 @@ logging:
 input_dir: data/
 
 technology_mapping:
-  weather_year: [2021] # for spatial data cutout
+  weather_year: [2022] # for spatial data cutout
   technology: ["onwind", "solar"] #, "offwind"
   utc: 1 # utc time for conversion of local time zone
 
 scenario:
   countries: ["DE"]
-  output_folder: "sample"
-
+  output_folder: "template"
+  nuts_level: 1 # nuts level of the nodal division if applicable
 enable:
   build_shape: true
   build_year_cutout: true
