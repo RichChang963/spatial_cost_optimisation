@@ -133,10 +133,12 @@ if config["enable"].get("build_all_profiles", True):
 
 
 rule get_gadm:
+    output:
+        nuts_file = GIDIR + "/nuts/nuts_gadm.geojson",
     log: "log/00_get_gadm.log"
-        benchmark: "benchmarks/00_get_gadm"
-        script:
-            "scripts/00_get_gadm.py"
+    benchmark: "benchmarks/00_get_gadm"
+    script:
+        "scripts/00_get_gadm.py"
 
 
 rule remove_temporary_file:

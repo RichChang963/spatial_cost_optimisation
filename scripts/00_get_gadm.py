@@ -5,8 +5,10 @@ os.environ["OGR_GEOMETRY_ACCEPT_UNCLOSED_RING"] = "NO"
 
 import requests
 import shutil
+from pathlib import Path
 import zipfile
 import geopandas as gpd
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +77,10 @@ def download_GADM(iso2_code, update=False, nuts_level:int=1) -> tuple:
     GADM_inputfile_path = os.path.join(
         os.getcwd(),
         "data",
+        "geo_input",
         "gadm",
         GADM_filename + ".json.zip",
-    )  # Input filepath gpkg
+    )  # Input filepath
 
     if not os.path.exists(GADM_inputfile_path) or update is True:
         #  create data/osm directory
@@ -102,9 +105,41 @@ def download_GADM(iso2_code, update=False, nuts_level:int=1) -> tuple:
     return GADM_inputfile_path, GADM_filename
 
 
-def clean_geojson(GADM_inputfile_path:str, GADM_filename:str):
+def clean_geojson(GADM_inputfile_path:str, GADM_filename:str, nuts_level:int=1
+) -> gpd.GeoDataFrame:
+    """Unzip ZIP file, read, clean, and save Geojson file.
+
+    Parameters
+    ----------
+    GADM_inputfile_path : str
+        filename of GADM data
+    GADM_filename : str
+        file path of GADM data
+    nuts_level : int, optional
+        level of nodal division, by default 1
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        GeoDataFrame of nodal division
+    """
     archive = zipfile.ZipFile(GADM_inputfile_path, "r")
     node = gpd.read_file(archive.read(f"{GADM_filename}.json").decode("utf-8"))
+
+    if nuts_level == 1 and "ISO_1" in node.columns.unique():
+        filter_col = ["ISO_1", "NAME_1", "COUNTRY", "geometry"]
+    else:
+        filter_col = [
+            f"GID_{str(nuts_level)}", f"NAME_{str(nuts_level)}", "geometry"
+        ]
+    node = node[filter_col].rename(columns={
+        "ISO_1": "nuts", 
+        f"GID_{str(nuts_level)}": "nuts", 
+        f"NAME_{str(nuts_level)}": "node_name",
+        "COUNTRY": "country"
+    })[["country", "node_name", "nuts", "geometry"]]
+
+    return node.set_index("nuts")
 
 
 if __name__ == "__main__":
@@ -118,9 +153,15 @@ if __name__ == "__main__":
     country = snakemake.config["scenario"]["countries"]
     nuts_level = snakemake.config["scenario"]["gadm_nuts_level"]
 
+    nuts_gdf = gpd.GeoDataFrame()
     for c in country:
         GADM_inputfile_path, GADM_filename = download_GADM(c, nuts_level)
 
-        clean_geojson(GADM_inputfile_path, GADM_filename)
+        node = clean_geojson(GADM_inputfile_path, GADM_filename, nuts_level)
 
+        nuts_gdf = pd.concat([nuts_gdf, node], axis=1)
     
+    nuts_gdf.to_file(snakemake.output.nuts_file)
+
+    # remove ZIP files
+    shutil.rmtree(str(Path(GADM_inputfile_path).parents[0]))
