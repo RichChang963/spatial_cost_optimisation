@@ -99,7 +99,7 @@ def add_node(nuts:str, output_path_shape:str, output_path_node:str)-> gpd.GeoDat
     country_gdf["node_name"] = country_gdf["nuts"][:2].map({"SW": "SE", "AU": "AT"})
     country_gdf = country_gdf.set_index("node_name")
     country_gdf.to_file(output_path_shape, driver="GeoJSON") 
-    print(gdf.columns)
+
     final_gdf = gdf[["node_name" , "nuts", "geometry"]].set_index(["node_name", "nuts"])
     final_gdf = final_gdf.dissolve(by=["node_name", "nuts"], aggfunc="sum")[["geometry"]]
     final_gdf["geometry"].map(simplify_polys)

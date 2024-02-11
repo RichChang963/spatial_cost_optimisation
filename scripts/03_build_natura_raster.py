@@ -20,7 +20,7 @@ from _helpers import configure_logging, iso2_to_iso3_country, simplify_polys
 CUTOUT_CRS = "EPSG:4326"
 
 
-def determine_cutout_xXyY(cutout_name):
+def determine_cutout_xXyY(cutout_name:str):
     """Define the coordinate boundary of the cutout area
 
     Parameters
@@ -48,19 +48,19 @@ def determine_cutout_xXyY(cutout_name):
     return cutout_xXyY
 
 
-def get_transform_and_shape(bounds, res):
+def get_transform_and_shape(bounds:list, res:int):
     """transform the graph from shapefile into raster file
 
     Parameters
     ----------
-    bounds : array
+    bounds : list
         array of cooridnate boundary of cutout
     res : int
         resolution
 
     Returns
     -------
-    tuple
+    tuple[int, int]
         values of transform and new shape data in raster map
     """
     logger.info("Stage 2/5: Get transform and shape")
@@ -73,11 +73,12 @@ def get_transform_and_shape(bounds, res):
     return transform, shape
 
 
-def uniform_protected_area(country_name, input_path, natura_crs) -> gpd.GeoDataFrame:
+def uniform_protected_area(country_name:list, input_path:str, natura_crs:int
+) -> gpd.GeoDataFrame:
     """Add land use cover
     Parameters
     ----------
-    country_name: array
+    country_name: list
         an array of iso2 code of countries
     input_path : str
         folder path of shapefiles of protected_area data
@@ -89,8 +90,9 @@ def uniform_protected_area(country_name, input_path, natura_crs) -> gpd.GeoDataF
         a GeoDataFrame including all protected area
     """
     logger.info("Stage 3/5: Uniform protected area into one shapefile.")
-    protected_area_files = ([f for f in listdir(input_path) if any(f.endswith(name) 
-                            for name in "shp")])
+    protected_area_files = (
+        [f for f in listdir(input_path) if any(f.endswith(name) for name in "shp")]
+    )
     protected_area_paths = []
     for f in protected_area_files:
         protected_area_paths.append(input_path+"/"+f)
@@ -116,7 +118,21 @@ def uniform_protected_area(country_name, input_path, natura_crs) -> gpd.GeoDataF
     return final_gdf
 
 
-def save_raster_file(shapes, out_shape, transform, output_path):
+def save_raster_file(shapes:gpd.GeoDataFrame, out_shape:int, transform:int, 
+output_path:str):
+    """Mask the geometry and save the raster file.
+
+    Parameters
+    ----------
+    shapes : gpd.GeoDataFrame
+        Geojson file of the natura raster.
+    out_shape : int
+        values from the output of get_transform_and_shape function.
+    transform : int
+        values from the output of get_transform_and_shape function.
+    output_path : str
+        file path to save the raster file.
+    """
     logger.info("Stage 4/5: Mask geometry")
     raster = ~geometry_mask(shapes.geometry, out_shape, transform)
     raster = raster.astype(rio.uint8)
@@ -147,6 +163,7 @@ if __name__ == "__main__":
 
     natura_crs = snakemake.config["crs"]["area_crs"] # 3035
     country_name = snakemake.config["scenario"]["countries"]
+    resolution = snakemake.config["atlite"]["resolution"]
 
     cutouts = snakemake.input.cutouts
     xs, Xs, ys, Ys = zip(
@@ -155,7 +172,7 @@ if __name__ == "__main__":
     bounds = transform_bounds(
         CUTOUT_CRS, natura_crs, min(xs), min(ys), max(Xs), max(Ys)
     )
-    transform, out_shape = get_transform_and_shape(bounds, res=100)
+    transform, out_shape = get_transform_and_shape(bounds, res=resolution)
     shapefiles = uniform_protected_area(country_name, 
                                         snakemake.input.shapefiles_land,
                                         natura_crs)
