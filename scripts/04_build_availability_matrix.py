@@ -20,16 +20,19 @@ from _helpers import configure_logging
 logger = logging.getLogger(__name__)
 
 
+COPERNICUS_CRS = "EPSG:4326"
+GEBCO_CRS = "EPSG:4326"
 
-def calculate_land_availability_matrix(country_shapes, node, natura, gebco, copernicus_map, 
-    cutout_name, cutout_params, resolution, output_path, kwargs) -> xr.DataArray:
+def calculate_land_availability_matrix(country_shapes:str, node:gpd.GeoDataFrame, 
+natura:str, gebco:str, copernicus_map:str, cutout_name:str, cutout_params:dict, 
+resolution:int, output_path:str, kwargs:dict) -> xr.DataArray:
     """Create a land availability matrix.
 
     Parameters
     ----------
     country_shapes : str
         file path of shapfile of a whole country
-    node : shp
+    node : GeoDataFrame
         shapfile of node division of a country under nuts2 level 
     natura: str
         file path of the natura map
@@ -48,19 +51,15 @@ def calculate_land_availability_matrix(country_shapes, node, natura, gebco, cope
     kwargs : dict
         a dictionary including numbers of threads for multi-threading process
     """
-    COPERNICUS_CRS = "EPSG:4326"
-    GEBCO_CRS = "EPSG:4326"
     start = time.time()
     node_gdf = gpd.read_file(node).set_index("node_name")
-
     cutout = atlite.Cutout(cutout_name, **cutout_params)
-
     excluder = ExclusionContainer(crs=area_crs, res=resolution)
 
-    if "natura" in tech_config and tech_config["natura"]:
+    if tech_config.get("natura", False):
         excluder.add_raster(natura, nodata=0, allow_no_overlap=True)
 
-    if "copernicus" in tech_config and tech_config["copernicus"]:
+    if bool(tech_config.get("copernicus")):
         copernicus = tech_config["copernicus"]
         excluder.add_raster(
             copernicus_map,
@@ -68,7 +67,7 @@ def calculate_land_availability_matrix(country_shapes, node, natura, gebco, cope
             invert=True,
             crs=COPERNICUS_CRS,
         )
-        if "distance" in copernicus and tech_config["copernicus"]["distance"] > 0:
+        if copernicus.get("distance",0):
             excluder.add_raster(
                 copernicus_map,
                 codes=copernicus["distance_grid_codes"],
@@ -76,7 +75,7 @@ def calculate_land_availability_matrix(country_shapes, node, natura, gebco, cope
                 crs=COPERNICUS_CRS,
             )
 
-    if "max_depth" in tech_config:
+    if bool(tech_config.get("max_depth")):
         # lambda not supported for atlite + multiprocessing
         # use named function np.greater with partially frozen argument instead
         # and exclude areas where: -max_depth > grid cell depth
@@ -85,11 +84,11 @@ def calculate_land_availability_matrix(country_shapes, node, natura, gebco, cope
             gebco, codes=func, crs=GEBCO_CRS, nodata=-1000
         )
 
-    if "min_shore_distance" in tech_config:
+    if bool(tech_config.get("min_shore_distance")):
         buffer = tech_config["min_shore_distance"]
         excluder.add_geometry(country_shapes, buffer=buffer)
 
-    if "max_shore_distance" in tech_config:
+    if bool(tech_config.get("max_shore_distance")):
         buffer = tech_config["max_shore_distance"]
         excluder.add_geometry(country_shapes, buffer=buffer, invert=True)
 
