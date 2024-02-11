@@ -9,6 +9,7 @@ dependencies:
 
   - pypsa>=0.18.1
   - atlite>=0.2.6
+  - earth-osm>=0.1.0, <0.2.0
   - dask
 
   - xlrd
