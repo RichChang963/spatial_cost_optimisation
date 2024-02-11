@@ -8,7 +8,8 @@ input_dir: data/
 
 technology_mapping:
   weather_year: [2022] # for spatial data cutout
-  technology: ["onwind", "solar"] #, "offwind"
+  field: "agriculture" # "energy", "agriculture", "highways"
+  technology: ["onwind", "solar"] # "onwind", "solar", "offwind"
   utc: 1 # utc time for conversion of local time zone
 
 scenario:

@@ -54,9 +54,17 @@ cutout_params: dict, output_path:str):
         cutout_params["y"] = slice(*cutout_params["y"])
 
     logging.info(f"Preparing cutout with parameters {cutout_params}.")
-    features = ["wind", "height", "influx", "temperature", "runoff"]
+    
+    if snakemake.config["technology_mapping"]["field"] == "energy":
+        features = ["wind", "height", "influx", "temperature", "runoff"]
+    elif snakemake.config["technology_mapping"]["field"] == "agriculture":
+        features = ["wind", "height", "influx", "temperature", "runoff"]
+    else:
+        features = ["height"]
+
     cutout = atlite.Cutout(output_path, **cutout_params)
     cutout.prepare(features=features)
+        
     end = time.time()
     logger.info(f"Cutout features extracted. Processing Time: {round((end - start), 2)}s")
 
