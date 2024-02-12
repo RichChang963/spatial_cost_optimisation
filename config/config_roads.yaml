@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 version: 0.0.1
-field: "energy"
+field: "roads"
 
 logging:
   level: INFO
@@ -18,7 +18,7 @@ technology_mapping:
 
 scenario:
   countries: ["IT"] # in iso2
-  output_folder: "template_energy"
+  output_folder: "template_roads"
   gadm_nuts_level: 1 # for pulling nuts Geojson file from GADM source
 
 enable:
@@ -26,7 +26,7 @@ enable:
   build_year_cutout: true
   build_natura_raster: true
   build_all_matrices: true
-  build_all_profiles: true
+  build_all_profiles: false
 
 # definition of the Coordinate Reference Systems
 crs:
