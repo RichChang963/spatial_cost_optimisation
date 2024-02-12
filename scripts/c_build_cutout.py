@@ -59,9 +59,9 @@ cutout_params: dict, output_path:str):
 
     logging.info(f"Preparing cutout with parameters {cutout_params}.")
     
-    if snakemake.config["technology_mapping"]["field"] == "energy":
+    if snakemake.config["field"] == "energy":
         features = ["wind", "height", "influx", "temperature", "runoff"]
-    elif snakemake.config["technology_mapping"]["field"] == "agriculture":
+    elif snakemake.config["field"] == "agriculture":
         features = ["wind", "height", "influx", "temperature", "runoff"]
     else:
         features = ["height"]
