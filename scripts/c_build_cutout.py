@@ -59,12 +59,11 @@ cutout_params: dict, output_path:str):
 
     logging.info(f"Preparing cutout with parameters {cutout_params}.")
     
-    if snakemake.config["field"] == "energy":
+    if snakemake.config["field"] == "roads":
+        features = ["height", "temperature"]
+    else: # energy or agriculture
         features = ["wind", "height", "influx", "temperature", "runoff"]
-    elif snakemake.config["field"] == "agriculture":
-        features = ["wind", "height", "influx", "temperature", "runoff"]
-    else:
-        features = ["height"]
+        
 
     cutout = atlite.Cutout(output_path, **cutout_params)
     cutout.prepare(features=features)
@@ -78,7 +77,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("02_build_cutout", weather_year=2012)
+        snakemake = mock_snakemake("c_build_cutout", weather_year=2012)
 
     configure_logging(snakemake)
     nprocesses = int(snakemake.threads)

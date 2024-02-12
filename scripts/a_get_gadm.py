@@ -151,7 +151,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("00_get_gadm")
+        snakemake = mock_snakemake("a_get_gadm")
 
     configure_logging(snakemake)
     country = snakemake.config["scenario"]["countries"]

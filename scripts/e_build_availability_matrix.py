@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         pgb.streams.wrap_stderr()
-        snakemake = mock_snakemake("04_build_renewable_profiles", technology="onwind", weather_year=2012)
+        snakemake = mock_snakemake("e_build_availability_matrix", technology="onwind", weather_year=2012)
 
     configure_logging(snakemake)
     nprocesses = int(snakemake.threads)

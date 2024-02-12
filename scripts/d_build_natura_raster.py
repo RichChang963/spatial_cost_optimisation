@@ -162,7 +162,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("03_build_natura_raster")
+        snakemake = mock_snakemake("d_build_natura_raster")
     configure_logging(snakemake)
 
     natura_crs = snakemake.config["crs"]["area_crs"] # 3035
