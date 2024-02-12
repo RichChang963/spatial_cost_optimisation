@@ -20,10 +20,10 @@ rule build_cutout:
         offshore_shapes = CDIR + "/node_offshore.geojson",
     output: 
         cutout = CDIR + "/netcdf_records/build_cutout_{weather_year}.nc",
-    log: "log/02_build_cutout_{weather_year}.log"
-    benchmark: "benchmarks/02_build_cutout_{weather_year}"
+    log: "log/c_build_cutout_{weather_year}.log"
+    benchmark: "benchmarks/c_build_cutout_{weather_year}"
     script:
-        "scripts/02_build_cutout.py"
+        "scripts/c_build_cutout.py"
 
 
 rule build_availability_matrix:
@@ -44,14 +44,14 @@ rule build_availability_matrix:
     output:
         land_availability = CDIR + "/netcdf_records/land_availability_{technology}_{weather_year}.nc",
     log:
-        "log" + "/04_build_availability_matrix_{technology}_{weather_year}.log",
+        "log" + "/e_build_availability_matrix_{technology}_{weather_year}.log",
     benchmark:
-        "benchmarks" + "/04_build_availability_matrix_{technology}_{weather_year}"
+        "benchmarks" + "/e_build_availability_matrix_{technology}_{weather_year}"
     threads: ATLITE_NPROCESSES
     resources:
         mem_mb=ATLITE_NPROCESSES * 5000,
     script:
-        "scripts/04_build_availability_matrix.py"
+        "scripts/e_build_availability_matrix.py"
 
 
 rule build_res_profiles:
@@ -70,14 +70,14 @@ rule build_res_profiles:
         res_map = CDIR + "/{technology}_potentials_{weather_year}.png",
         monthly_cf = CDIR + "/{technology}_monthly_cf_{weather_year}.png",
     log:
-        "log" + "/05_build_res_profiles_{technology}_{weather_year}.log",
+        "log" + "/f_build_res_profiles_{technology}_{weather_year}.log",
     benchmark:
-        "benchmarks" + "/05_build_res_profiles_{technology}_{weather_year}"
+        "benchmarks" + "/f_build_res_profiles_{technology}_{weather_year}"
     threads: ATLITE_NPROCESSES
     resources:
         mem_mb=ATLITE_NPROCESSES * 1000,
     script:
-        "scripts/05_build_res_profiles.py"
+        "scripts/f_build_res_profiles.py"
 
 
 if config["enable"].get("build_shape", True):
@@ -90,10 +90,10 @@ if config["enable"].get("build_shape", True):
             onshore_shapes = CDIR + "/node_onshore.geojson",
             offshore_shapes = CDIR + "/node_offshore.geojson",
             onshore_map = CDIR + "/country_map_by_node.png",
-        log: "log/01_build_shape.log"
-        benchmark: "benchmarks/01_build_shape"
+        log: "log/b_build_shape.log"
+        benchmark: "benchmarks/b_build_shape"
         script:
-            "scripts/01_build_shape.py"
+            "scripts/b_build_shape.py"
 
 if config["enable"].get("build_year_cutout", True):
     rule build_year_cutout:
@@ -108,10 +108,10 @@ if config["enable"].get("build_natura_raster", True):
             cutouts = expand(CDIR + "/netcdf_records/build_cutout_" + str(config["technology_mapping"]["weather_year"][0]) + ".nc"),
         output:
             natura_raster =  CDIR + "/natura.tiff",
-        log: "log/03_build_natura_raster.log"
+        log: "log/d_build_natura_raster.log"
         benchmark: "benchmarks/03_build_natura_raster"
         script:
-            "scripts/03_build_natura_raster.py"
+            "scripts/d_build_natura_raster.py"
 
 
 if config["enable"].get("build_all_matrices", True):
@@ -135,10 +135,10 @@ if config["enable"].get("build_all_profiles", True):
 rule get_gadm:
     output:
         nuts_file = GIDIR + "/nuts/nuts_gadm.geojson",
-    log: "log/00_get_gadm.log"
-    benchmark: "benchmarks/00_get_gadm"
+    log: "log/a_get_gadm.log"
+    benchmark: "benchmarks/a_get_gadm"
     script:
-        "scripts/00_get_gadm.py"
+        "scripts/a_get_gadm.py"
 
 
 rule remove_temporary_file:

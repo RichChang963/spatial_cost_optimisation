@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: : 2024 The spatial_cost_optimisation Author
+#
+# SPDX-License-Identifier: MIT
+
 version: 0.0.1
 
 logging:
@@ -7,7 +11,7 @@ logging:
 input_dir: data/
 
 technology_mapping:
-  weather_year: [2022] # for spatial data cutout
+  weather_year: [2022] # weather year for natural resource
   field: "agriculture" # "energy", "agriculture", "highways"
   technology: ["onwind", "solar"] # "onwind", "solar", "offwind"
   utc: 1 # utc time for conversion of local time zone
@@ -42,24 +46,12 @@ atlite:
 atlite_config:
   onwind:
     tech_method: wind
-    capacity_per_sqkm: 4 # Allowable density of wind turbine placement. # ScholzPhd Tab 4.3.1: 10MW/km^2
+    capacity_per_sqkm: 4 # Allowable density of wind turbine placement.
     resource:
       turbine: oedb:E-141/4200
     correction_factor: 0.8855
     evaluation: simple
     copernicus:
-      # Scholz, Y. (2012). Renewable energy based electricity supply at low costs:
-      #  development of the REMix model and application for Europe. ( p.42 / p.28)
-      # CLC grid codes:
-      # 11X/12X - Various forest types
-      # 20  - Shrubs
-      # 30  - Herbaceus vegetation
-      # 40  - Cropland
-      # 50  - Urban
-      # 60  - Bare / Sparse vegetation
-      # 80  - Permanent water bodies
-      # 100 - Moss and lichen
-      # 200 - Open sea
       grid_codes:  [20, 30, 40, 50, 60, 100, 111, 112, 113, 114, 115, 116, 121, 122, 123, 124, 125, 126]
       distance: 1000
       distance_grid_codes: [50]

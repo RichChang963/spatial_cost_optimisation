@@ -278,7 +278,7 @@ def plot_style():
     matplotlib.rcParams["lines.linewidth"] = 2
     matplotlib.rcParams["lines.linestyle"] = "--"
     ############        FONT           ############
-    matplotlib.rcParams["font.family"] = "Flexo"
+    matplotlib.rcParams["font.family"] = "Arial"
     matplotlib.rcParams["font.size"] = 14
     ############        AXES           ############
     matplotlib.rcParams["axes.facecolor"] = "#E3E4EA"
