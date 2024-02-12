@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 version: 0.0.1
+field: "energy"
 
 logging:
   level: INFO
@@ -12,12 +13,12 @@ input_dir: data/
 
 technology_mapping:
   weather_year: [2022] # weather year for natural resource
-  technology: ["onwind", "solar"] # "onwind", "solar" , "offwind"
+  technology: ["onwind", "solar"] # "onwind", "solar", "offwind"
   utc: 1 # utc time for conversion of local time zone
 
 scenario:
-  countries: ["DE"] # in iso2
-  output_folder: "template"
+  countries: ["IT"] # in iso2
+  output_folder: "template_energy"
   gadm_nuts_level: 1 # for pulling nuts Geojson file from GADM source
 
 enable:

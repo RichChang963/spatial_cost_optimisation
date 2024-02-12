@@ -310,7 +310,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         pgb.streams.wrap_stderr()
-        snakemake = mock_snakemake("05_build_res_profiles", technology="onwind", weather_year=2012)
+        snakemake = mock_snakemake("f_build_res_profiles", technology="onwind", weather_year=2012)
 
     configure_logging(snakemake)
     nprocesses = int(snakemake.threads)

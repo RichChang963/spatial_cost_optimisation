@@ -3,10 +3,7 @@ from shutil import copyfile, move, rmtree
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 HTTP = HTTPRemoteProvider()
 
-if not exists("config/config.yaml"):
-    copyfile("config/config.default.yaml", "config/config.yaml")
-
-configfile: "config/config.yaml"
+configfile: "config/config_energy.yaml"
 
 ATLITE_NPROCESSES = config["atlite"].get("nprocesses", 4)
 

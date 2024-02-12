@@ -204,7 +204,7 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("01_build_shape")
+        snakemake = mock_snakemake("b_build_shape")
 
     configure_logging(snakemake)
     countries = snakemake.config["scenario"]["countries"]
