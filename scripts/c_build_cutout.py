@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: : 2024 The spatial_cost_optimisation Author
+#
+# SPDX-License-Identifier: MIT
+
 import logging
 import time
 import os
