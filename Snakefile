@@ -80,7 +80,7 @@ rule build_res_profiles:
 if config["enable"].get("build_shape", True):
     rule build_shape:
         input: 
-            nuts = GIDIR + "/nuts/template_DE.geojson",
+            nuts = GIDIR + "/nuts/template_IT.geojson",
             eez = GIDIR + "/eez/eez_v12.gpkg",
         output: 
             country_shapes = CDIR + "/country_shape.geojson",
