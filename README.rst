@@ -6,12 +6,9 @@
 Spatial cost optimisation
 ======
 
-|Conda version| |standard-readme compliant| |MIT-image| |black| |pre-commit.ci| 
-
 This is a GIS tool to evaluate land availability and execute cost optimisation on network planning (e.g. grid networks, road network, etc.). It consists of an GIS analysis to evaluate land availability, as well as a cost optimisation on network searching and growth using Greedy (Prim's) Algorithm. 
 
-The GIS analaysis is based on the foundation of `Atlite<https://github.com/PyPSA/atlite>`_, a `free software`_, `xarray`_-based Python library for converting weather data (like wind speeds, solar influx) into energy systems data. 
-
+The GIS analaysis is based on the foundation of `Atlite <https://github.com/PyPSA/atlite>`_, a free software, xarray-based Python library for converting weather data (like wind speeds, solar influx) into energy systems data. 
 
 Installation
 ============
@@ -30,7 +27,7 @@ After completion of installing Mamba, please clone the repository into your loca
 
          git clone https://github.com/RichChang963/spatial_cost_optimisation.git
 
-The python package requirements are curated in the `envs/environment.yaml`_ file. The environment can be installed and activated using
+The python package requirements are curated in the ``envs/environment.yaml`` file. The environment can be installed and activated using
 
 .. code:: shell
 
@@ -46,7 +43,7 @@ The environment can be installed and activated using
 Documentation
 ===============
 
-Please check the `documentation <>`_.
+Please check the ``documentation``.
 
 
 Authors and Copyright
@@ -58,11 +55,9 @@ Copyright (C) 2024 The spatial_cost_optimisation Author.
 Licence
 =======
 
-|MIT-image|
-
 This work is licensed under multiple licences:
 
--  All original source code is licensed under `MIT`_
--  Auxiliary code from SPHINX is licensed under `BSD-2-Clause`_.
--  The documentation is licensed under `CC-BY-4.0`_.
--  Configuration and data files are mostly licensed under `CC0-1.0`_.
+-  All original source code is licensed under `MIT <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/MIT.txt>`_
+-  Auxiliary code from SPHINX is licensed under `BSD-2-Clause <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/BSD-2-Clause.txt>`_.
+-  The documentation is licensed under `CC-BY-4.0 <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/CC-BY-4.0.txt>`_`_.
+-  Configuration and data files are mostly licensed under `CC0-1.0 <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/CC0-1.0.txt>`_`_.
