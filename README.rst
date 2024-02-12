@@ -59,5 +59,5 @@ This work is licensed under multiple licences:
 
 -  All original source code is licensed under `MIT <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/MIT.txt>`_
 -  Auxiliary code from SPHINX is licensed under `BSD-2-Clause <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/BSD-2-Clause.txt>`_.
--  The documentation is licensed under `CC-BY-4.0 <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/CC-BY-4.0.txt>`_`_.
--  Configuration and data files are mostly licensed under `CC0-1.0 <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/CC0-1.0.txt>`_`_.
+-  The documentation is licensed under `CC-BY-4.0 <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/CC-BY-4.0.txt>`_.
+-  Configuration and data files are mostly licensed under `CC0-1.0 <https://github.com/RichChang963/spatial_cost_optimisation/blob/develop/LICENSES/CC0-1.0.txt>`_.
