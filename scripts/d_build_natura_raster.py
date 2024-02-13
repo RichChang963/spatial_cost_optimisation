@@ -24,13 +24,15 @@ from _helpers import configure_logging, iso2_to_iso3_country, simplify_polys
 CUTOUT_CRS = "EPSG:4326"
 
 
-def determine_cutout_xXyY(cutout_name:str):
+def determine_cutout_xXyY(cutout_name:str, cutout_params:dict):
     """Define the coordinate boundary of the cutout area
 
     Parameters
     ----------
     cutout_name : str
         the name of the cutout
+    cutout_params: dict
+        a dictionary of cutout variables for era5 api
 
     Returns
     -------
@@ -38,7 +40,7 @@ def determine_cutout_xXyY(cutout_name:str):
         values of boundary of cutout
     """
     logger.info("Stage 1/5: Determine cutout boundaries")
-    cutout = atlite.Cutout.from_netcdf(cutout_name)
+    cutout = atlite.Cutout(cutout_name, **cutout_params)
     assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
@@ -48,7 +50,6 @@ def determine_cutout_xXyY(cutout_name:str):
         y - dy / 2.0, 
         Y + dy / 2.0, 
     ]
-
     return cutout_xXyY
 
 
@@ -168,10 +169,11 @@ if __name__ == "__main__":
     natura_crs = snakemake.config["crs"]["area_crs"] # 3035
     country_name = snakemake.config["scenario"]["countries"]
     resolution = snakemake.config["atlite"]["resolution"]
+    cutout_params = snakemake.config["atlite"]["cutouts"]
 
     cutouts = snakemake.input.raw_cutout
     xs, Xs, ys, Ys = zip(
-        *(determine_cutout_xXyY(cutout) for cutout in cutouts)
+        (determine_cutout_xXyY(cutouts, cutout_params))
     )
     bounds = transform_bounds(
         CUTOUT_CRS, natura_crs, min(xs), min(ys), max(Xs), max(Ys)
