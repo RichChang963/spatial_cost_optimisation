@@ -109,7 +109,7 @@ rule build_res_profiles:
         onshore_shapes = CDIR + "/node_onshore.geojson",
         offshore_shapes = CDIR + "/node_offshore.geojson",
     output:
-        cutout = CDIR + "/netcdf_records/build_cutout_{weather_year}.nc",
+        cutout = CDIR + "/netcdf_records/land_availability_{technology}_{weather_year}.nc",
         availability = CDIR + "/Availability_share_{technology}_{weather_year}.csv",
         max_potentials = CDIR + "/Renewables_technical_potentials_{technology}_{weather_year}.csv",
         hourly_profile = CDIR + "/Availability_{technology}_{weather_year}.csv",
@@ -131,7 +131,7 @@ rule build_res_profiles:
 if config["enable"].get("build_all_profiles", True):
     rule build_all_profiles:
         input:
-            expand(CDIR + "/netcdf_records/build_cutout_{weather_year}.nc", **config["technology_mapping"]),
+            expand(CDIR + "/netcdf_records/land_availability_{technology}_{weather_year}.nc", **config["technology_mapping"]),
             expand(CDIR + "/Availability_share_{technology}_{weather_year}.csv", **config["technology_mapping"]),
             expand(CDIR + "/Renewables_technical_potentials_{technology}_{weather_year}.csv", **config["technology_mapping"]),
             expand(CDIR + "/Availability_{technology}_{weather_year}.csv", **config["technology_mapping"]),
