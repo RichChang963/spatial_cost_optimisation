@@ -38,7 +38,7 @@ def determine_cutout_xXyY(cutout_name:str):
         values of boundary of cutout
     """
     logger.info("Stage 1/5: Determine cutout boundaries")
-    cutout = atlite.Cutout(cutout_name)
+    cutout = atlite.Cutout.from_netcdf(cutout_name)
     assert cutout.crs == CUTOUT_CRS
     x, X, y, Y = cutout.extent
     dx, dy = cutout.dx, cutout.dy
@@ -162,14 +162,14 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        snakemake = mock_snakemake("d_build_natura_raster")
+        snakemake = mock_snakemake("d_build_natura_raster", weather_year=2012)
     configure_logging(snakemake)
 
     natura_crs = snakemake.config["crs"]["area_crs"] # 3035
     country_name = snakemake.config["scenario"]["countries"]
     resolution = snakemake.config["atlite"]["resolution"]
 
-    cutouts = snakemake.input.cutouts
+    cutouts = snakemake.input.raw_cutout
     xs, Xs, ys, Ys = zip(
         *(determine_cutout_xXyY(cutout) for cutout in cutouts)
     )

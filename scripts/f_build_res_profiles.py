@@ -87,7 +87,16 @@ avail_matrix:xr.Dataset, client:dict) -> tuple:
     evaluation = tech_config["evaluation"]
     resource = tech_config["resource"]
 
-    cutout = atlite.Cutout(cutout_name, **cutout_params) 
+    cutout = atlite.Cutout.from_netcdf(cutout_name, **cutout_params) 
+
+    logging.info(f"Preparing cutout with parameters {cutout_params}.")
+    
+    if snakemake.config["field"] == "roads":
+        features = ["height", "temperature"]
+    else: # energy or agriculture
+        features = ["wind", "height", "influx", "temperature", "runoff"]
+        
+    cutout.prepare(features=features)
 
     logger.info(f"Calculate renewable profiles (method '{evaluation}')...")
     area = cutout.grid.to_crs(3035).area / 1e6
@@ -317,7 +326,7 @@ if __name__ == "__main__":
     cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
     client = Client(cluster, asynchronous=True)
 
-    cutout_path = snakemake.input.cutout
+    cutout_path = snakemake.input.raw_cutout
     avail_matrix = snakemake.input.land_availability
     potential_map_output = snakemake.output.res_map
     monthly_profile_graph_output = snakemake.output.monthly_cf
