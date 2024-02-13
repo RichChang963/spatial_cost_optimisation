@@ -24,7 +24,7 @@ scenario:
 enable:
   build_shape: true
   build_year_cutout: true
-  build_natura_raster: true
+  build_all_natura_rasters: true
   build_all_matrices: true
   build_all_profiles: true
 
