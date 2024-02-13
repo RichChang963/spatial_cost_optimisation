@@ -109,7 +109,7 @@ resolution:int, output_path:str, kwargs:dict) -> xr.DataArray:
     duration = time.time() - start
     logger.info(f"Completed availability calculation ({duration:2.2f}s)")
 
-    availability.to_netcdf(output_path)
+    availability.to_file(output_path)
 
 
 

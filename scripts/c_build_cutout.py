@@ -60,7 +60,7 @@ cutout_params: dict, output_path:str):
     logging.info(f"Preparing cutout without parameters {cutout_params}.")
 
     raw_cutout = atlite.Cutout("/netcdf_records", **cutout_params)
-    raw_cutout.to_netcdf(output_path)
+    raw_cutout.to_file(output_path)
 
     end = time.time()
     logger.info(f"Cutout features extracted. Processing Time: {round((end - start), 2)}s")
