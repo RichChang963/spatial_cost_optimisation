@@ -57,7 +57,7 @@ resolution:int, output_path:str, kwargs:dict) -> xr.DataArray:
     """
     start = time.time()
     node_gdf = gpd.read_file(node).set_index("node_name")
-    cutout = atlite.Cutout.from_netcdf(cutout_name, **cutout_params)
+    cutout = atlite.Cutout(cutout_name, **cutout_params)
     excluder = ExclusionContainer(crs=area_crs, res=resolution)
 
     if tech_config.get("natura", False):

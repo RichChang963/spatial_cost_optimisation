@@ -52,9 +52,9 @@ rule build_natura_raster:
             shapefiles_land = GIDIR + "/protected_area",
             raw_cutout = CDIR + "/netcdf_records/raw_cutout_{weather_year}.nc",
         output:
-            natura_raster =  CDIR + "/natura.tiff",
-        log: "log/d_build_natura_raster.log"
-        benchmark: "benchmarks/d_build_natura_raster"
+            natura_raster =  CDIR + "/natura_{weather_year}.tiff",
+        log: "log/d_build_natura_raster_{weather_year}.log"
+        benchmark: "benchmarks/d_build_natura_raster_{weather_year}"
         script:
             "scripts/d_build_natura_raster.py"
 
@@ -62,7 +62,7 @@ rule build_natura_raster:
 if config["enable"].get("build_all_natura_rasters", True):
     rule build_all_natura_rasters:
         input:
-           expand(CDIR + "/netcdf_records/raw_cutout_{weather_year}.nc", **config["technology_mapping"]),
+           expand(CDIR + "/natura_{weather_year}.tiff", **config["technology_mapping"]),
 
 
 # command to enable build_availability_matrix process (without weather_year & technology wildcards)

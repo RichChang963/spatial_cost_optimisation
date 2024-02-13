@@ -87,7 +87,7 @@ avail_matrix:xr.Dataset, client:dict) -> tuple:
     evaluation = tech_config["evaluation"]
     resource = tech_config["resource"]
 
-    cutout = atlite.Cutout.from_netcdf(cutout_name, **cutout_params) 
+    cutout = atlite.Cutout(cutout_name, **cutout_params) 
 
     logging.info(f"Preparing cutout with parameters {cutout_params}.")
     

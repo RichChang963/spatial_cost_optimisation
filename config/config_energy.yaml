@@ -12,7 +12,7 @@ logging:
 input_dir: data/
 
 technology_mapping:
-  weather_year: [2022] # weather year for natural resource
+  weather_year: [2021] # weather year for natural resource
   technology: ["onwind", "solar"] # "onwind", "solar", "offwind"
   utc: 1 # utc time for conversion of local time zone
 
