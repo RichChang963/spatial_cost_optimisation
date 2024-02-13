@@ -57,17 +57,11 @@ cutout_params: dict, output_path:str):
         cutout_params["x"] = slice(*cutout_params["x"])
         cutout_params["y"] = slice(*cutout_params["y"])
 
-    logging.info(f"Preparing cutout with parameters {cutout_params}.")
-    
-    if snakemake.config["field"] == "roads":
-        features = ["height", "temperature"]
-    else: # energy or agriculture
-        features = ["wind", "height", "influx", "temperature", "runoff"]
-        
+    logging.info(f"Preparing cutout without parameters {cutout_params}.")
 
-    cutout = atlite.Cutout(output_path, **cutout_params)
-    cutout.prepare(features=features)
-        
+    raw_cutout = atlite.Cutout("/netcdf_records", **cutout_params)
+    raw_cutout.to_netcdf(output_path)
+
     end = time.time()
     logger.info(f"Cutout features extracted. Processing Time: {round((end - start), 2)}s")
 
@@ -89,4 +83,4 @@ if __name__ == "__main__":
                   snakemake.input.offshore_shapes, 
                   snakemake.wildcards.weather_year,
                   cutout_params,
-                  snakemake.output.cutout)
+                  snakemake.output.raw_cutout)
