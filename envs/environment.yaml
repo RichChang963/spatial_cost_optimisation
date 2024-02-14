@@ -3,44 +3,56 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python>=3.8
+  - python>=3.10
   - pip
 
+  # GIS
   - atlite>=0.2.6
-  - earth-osm>=0.1.0, <0.2.0
-  - dask
-
-  - xlrd
-  - openpyxl
-  - pycountry
-  - snakemake-minimal
-  - memory_profiler
-  - pre-commit
-  - yaml
-  - pytables
-  - lxml
-  - numpy
-  - pandas = 1.4.3
-
-  - geopandas>=0.11.1
-  - xarray
-  - netcdf4
-  - networkx
-  - shapely
-  - progressbar2
-  - matplotlib
+  - fiona <= 1.18.20 
+  - geopandas >=0.11.1
   - proj
-  - fiona <= 1.18.20  
+  - rasterio
+  - richdem
+  - shapely
+  # - earth-osm>=0.1.0, <0.2.0
 
-  # Keep in conda environment when calling ipython
+  # Network optimisation
+  - pyomo
+  - xarray
+  - rioxarray
+  - networkx
+
+  - dask
+  - lxml
+  - matplotlib
+  - memory_profiler
+  - netcdf4
+  - numpy
+  - pandas >=1.4.3
+  - pre-commit
+  - progressbar2
+  - pycountry
+  - pytables
+  - openpyxl
+  - snakemake-minimal=7.30.1
+  - xlrd
+  - yaml
+
   - ipython
   - ipykernel
-  - rasterio
   - tqdm
   - pytz
-  - ipykernel
+
+  # solvers
+  - gurobi
+  - ipopt 
+  - glpk
+
   - pip:
-    - vresutils>=0.3.1
     - black
     - cdsapi
-    - git+https://github.com/snakemake/snakemake
+    - highspy
+    - linopy>=0.2
+    - vresutils>=0.3.1
+    - snakemake_interface_executor_plugins==1.0.1
+    - git+https://github.com/snakemake/snakemake.git
