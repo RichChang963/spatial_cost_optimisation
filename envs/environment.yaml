@@ -3,19 +3,19 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python>=3.10
+  - python >=3.10
   - pip
 
   # GIS
-  - atlite>=0.2.6
+  - atlite >=0.2.11
   - fiona <= 1.18.20 
   - geopandas >=0.11.1
   - proj
-  - rasterio
+  - rasterio =>1.2.10
   - richdem
   - shapely
   # - earth-osm>=0.1.0, <0.2.0
-
+# https://pyrosm.readthedocs.io/en/latest/installation.html
   # Network optimisation
   - pyomo
   - xarray
@@ -52,7 +52,7 @@ dependencies:
     - black
     - cdsapi
     - highspy
-    - linopy>=0.2
-    - vresutils>=0.3.1
+    - linopy >=0.2
+    - vresutils >=0.3.1
     - snakemake_interface_executor_plugins==1.0.1
     - git+https://github.com/snakemake/snakemake.git
